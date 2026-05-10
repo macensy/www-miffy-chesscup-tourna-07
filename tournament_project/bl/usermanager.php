@@ -16,48 +16,88 @@ class usermanager {
         $this->db->prepare($sql)->execute([$uID, $action]);
     }
 
-    public function login($fn, $ln) {
-        $sql = "SELECT * FROM tbl_players WHERE firstName = ? AND lastName = ?";
+    public function login($email, $password) {
+        $sql = "SELECT * FROM tbl_players WHERE email = ? AND role = 'Player'";
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([$fn, $ln]);
+            $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($user) {
-                $_SESSION['user'] = $user; 
-                $this->addLog("User Logged In: " . $user['firstName'] . " " . $user['lastName']);
-                return true;
-            }
-            return false;
+            if (!$user) return 'not_found';
+            if (!password_verify($password, $user['password'])) return 'wrong_password';
+
+            $_SESSION['user'] = $user;
+            $this->addLog("User Logged In: " . $user['firstName'] . " " . $user['lastName']);
+            return true;
         } catch (Exception $e) {
             return false;
         }
     }
 
-    public function registerAdminFunc($id, $fn, $ln, $role) {
+    // Check if any admin account exists
+    public function adminExists() {
         try {
-            $sql = "INSERT INTO tbl_players (userID, firstName, lastName, role, gender, age, rating) 
-                    VALUES (?, ?, ?, ?, 'N/A', 0, 0)";
-            
+            $stmt = $this->db->prepare("SELECT userID FROM tbl_players WHERE role = 'Admin' LIMIT 1");
+            $stmt->execute();
+            return $stmt->fetch() ? true : false;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    // Admin login with email + bcrypt password
+    public function adminLogin($email, $password) {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM tbl_players WHERE email = ? AND role = 'Admin'");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$user) return 'not_found';
+            if (!password_verify($password, $user['password'])) return 'wrong_password';
+
+            $_SESSION['user'] = $user;
+            $this->addLog("Admin Logged In: " . $user['firstName'] . " " . $user['lastName']);
+            return true;
+        } catch (Exception $e) {
+            return 'error';
+        }
+    }
+
+    // Register first-time admin with hashed password
+    public function registerAdminFunc($id, $fn, $ln, $role, $email, $password) {
+        try {
+            $check = $this->db->prepare("SELECT userID FROM tbl_players WHERE email = ? AND role = 'Admin'");
+            $check->execute([$email]);
+            if ($check->fetch()) return 'email_taken';
+
+            $hashed = password_hash($password, PASSWORD_BCRYPT);
+            $sql = "INSERT INTO tbl_players (userID, firstName, lastName, role, gender, age, rating, email, password)
+                    VALUES (?, ?, ?, ?, 'N/A', 0, 0, ?, ?)";
             $stmt = $this->db->prepare($sql);
-            $success = $stmt->execute([$id, $fn, $ln, $role]);
+            $success = $stmt->execute([$id, $fn, $ln, $role, $email, $hashed]);
 
             if ($success) {
                 $this->addLog("Registered Admin: $fn $ln (ID: $id)");
                 return true;
             }
-            return "Failed to insert into players table.";
+            return "Failed to insert admin into database.";
         } catch (Exception $e) {
-            return "SQL Error: " . $e->getMessage(); 
+            return "SQL Error: " . $e->getMessage();
         }
     } 
 
-    public function registerPlayer($fn, $ln, $gd, $ag, $rt, $role) {
-        $sql = "INSERT INTO tbl_players (firstName, lastName, gender, age, rating, role) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+    public function registerPlayer($fn, $ln, $gd, $ag, $rt, $role, $email, $password) {
         try {
+            // Check if email already exists
+            $check = $this->db->prepare("SELECT userID FROM tbl_players WHERE email = ?");
+            $check->execute([$email]);
+            if ($check->fetch()) return 'email_taken';
+
+            $hashed = password_hash($password, PASSWORD_BCRYPT);
+            $sql = "INSERT INTO tbl_players (firstName, lastName, gender, age, rating, role, email, password)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->db->prepare($sql);
-            $success = $stmt->execute([$fn, $ln, $gd, $ag, $rt, $role]);
+            $success = $stmt->execute([$fn, $ln, $gd, $ag, $rt, $role, $email, $hashed]);
 
             if ($success) {
                 $this->addLog("Registered Player: $fn $ln");

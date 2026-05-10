@@ -20,58 +20,80 @@ $(document).ready(function() {
 
 
 function loginFunc() {
-    let data = {
-        choice: 'login',
-        fn: $('#icon_LFName').val(),
-        ln: $('#icon_LLName').val()
-    };
+    let email = $('#LoginEmail').val().trim();
+    let pass  = $('#LoginPassword').val();
 
-    $.post('../controllers/controller.php', data, function(res) {
-        if (res.trim() == "true") {
-            window.location.href = "dashboardpage.php"; 
+    if (!email || !pass) {
+        Swal.fire('Wait', 'Please enter your email and password.', 'warning');
+        return;
+    }
+
+    $.post('../controllers/controller.php', { choice: 'login', email: email, password: pass }, function(res) {
+        if (res.trim() == 'true') {
+            window.location.href = 'dashboardpage.php';
+        } else if (res.trim() == 'wrong_password') {
+            Swal.fire('Error', 'Incorrect password.', 'error');
+        } else if (res.trim() == 'not_found') {
+            Swal.fire('Error', 'No account found with that email.', 'error');
         } else {
-            Swal.fire("Error", "Login Failed", "error");
+            Swal.fire('Error', 'Login failed. Please try again.', 'error');
         }
     });
 }
 
 function addFunc() {
-    let fn = $('#FName').val();
-    let ln = $('#LName').val();
-    let gd = $('#Gender').val();
-    let ag = $('#Age').val();
-    let rt = $('#Rating').val();
+    let fn   = $('#FName').val().trim();
+    let ln   = $('#LName').val().trim();
+    let gd   = $('#Gender').val();
+    let ag   = $('#Age').val();
+    let rt   = $('#Rating').val();
+    let em   = $('#RegEmail').val().trim();
+    let pass = $('#RegPassword').val();
+    let conf = $('#RegConfirm').val();
 
-    // Validations
-    if (!fn || !ln || !gd || !ag || !rt) {
-        Swal.fire("Wait", "Please complete all player details!", "warning");
-        return;
+    if (!fn || !ln || !gd || !ag || !rt || !em || !pass || !conf) {
+        Swal.fire('Wait', 'Please complete all fields!', 'warning'); return;
     }
     if (fn.length < 2 || ln.length < 2) {
-        Swal.fire("Invalid Name", "First and Last Name must be at least 2 characters.", "error");
-        return;
+        Swal.fire('Invalid Name', 'First and Last Name must be at least 2 characters.', 'error'); return;
     }
-    if (ag.length > 2 || parseInt(ag) > 99) {
-        Swal.fire("Invalid Age", "Age must not exceed 99.", "error");
-        return;
+    if (parseInt(ag) > 99) {
+        Swal.fire('Invalid Age', 'Age must not exceed 99.', 'error'); return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+        Swal.fire('Invalid Email', 'Please enter a valid email address.', 'error'); return;
+    }
+    if (pass.length < 8) {
+        Swal.fire('Too Short', 'Password must be at least 8 characters.', 'warning'); return;
+    }
+    if (pass.length > 32) {
+        Swal.fire('Too Long', 'Password must not exceed 32 characters.', 'warning'); return;
+    }
+    if (!/[A-Z]/.test(pass)) {
+        Swal.fire('Weak Password', 'Password must include at least 1 uppercase letter (A-Z).', 'warning'); return;
+    }
+    if (!/[a-z]/.test(pass)) {
+        Swal.fire('Weak Password', 'Password must include at least 1 lowercase letter (a-z).', 'warning'); return;
+    }
+    if (!/[0-9]/.test(pass)) {
+        Swal.fire('Weak Password', 'Password must include at least 1 number (0-9).', 'warning'); return;
+    }
+    if (!/[^A-Za-z0-9]/.test(pass)) {
+        Swal.fire('Weak Password', 'Password must include at least 1 special character (e.g. @, #, !).', 'warning'); return;
+    }
+    if (pass !== conf) {
+        Swal.fire('Password Mismatch', 'Passwords do not match!', 'error'); return;
     }
 
-    let data = {
-        choice: 'registerPlayer',
-        fn: fn,
-        ln: ln,
-        gd: gd,
-        ag: ag,
-        rt: rt
-    };
-
-    $.post('../controllers/controller.php', data, function(res) {
-        if (res.trim() == "true") {
-            Swal.fire("Success", "Player Registered!", "success").then(() => {
-                location.reload();
-            });
+    $.post('../controllers/controller.php', {
+        choice: 'registerPlayer', fn, ln, gd, ag, rt, email: em, password: pass
+    }, function(res) {
+        if (res.trim() == 'true') {
+            Swal.fire('Success!', 'Player Registered! You can now login.', 'success').then(() => location.reload());
+        } else if (res.trim() == 'email_taken') {
+            Swal.fire('Email Taken', 'That email is already registered.', 'error');
         } else {
-            Swal.fire("Error", "Registration failed: " + res, "error");
+            Swal.fire('Error', 'Registration failed: ' + res, 'error');
         }
     });
 }
