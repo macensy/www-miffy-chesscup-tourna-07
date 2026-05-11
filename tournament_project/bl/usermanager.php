@@ -102,6 +102,7 @@ class usermanager {
     public function resetTournament() {
         try {
             $this->db->exec("DELETE FROM tbl_pairing");
+            $this->db->exec("UPDATE tbl_standings SET total_score = 0");
             return true;
         } catch (Exception $e) {
             return "Error: " . $e->getMessage();
@@ -133,13 +134,41 @@ class usermanager {
         $match = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$match) return "Error: Match not found.";
 
+        $p1 = $match['player1_id'];
+        $p2 = $match['player2_id'];
+
         $winner = null;
-        if ($s1 > $s2) $winner = $match['player1_id'];
-        elseif ($s2 > $s1) $winner = $match['player2_id'];
+        if ($s1 > $s2) $winner = $p1;
+        elseif ($s2 > $s1) $winner = $p2;
 
         $res = $this->db->prepare("UPDATE tbl_pairing SET p1_score = ?, p2_score = ?, winner_id = ?, status = 'FINISHED' WHERE match_id = ?")
                         ->execute([$s1, $s2, $winner, (int)$mid]);
-        return $res ? true : "Error updating score.";
+        if (!$res) return "Error updating score.";
+
+       
+        foreach ([$p1, $p2] as $pid) {
+            // Get player's name from tbl_players
+            $nameStmt = $this->db->prepare("SELECT CONCAT(firstName, ' ', lastName) AS player_name FROM tbl_players WHERE userID = ?");
+            $nameStmt->execute([(int)$pid]);
+            $nameRow = $nameStmt->fetch(PDO::FETCH_ASSOC);
+            $playerName = $nameRow ? $nameRow['player_name'] : '';
+
+            $scoreStmt = $this->db->prepare(
+                "SELECT COUNT(*) FROM tbl_pairing WHERE winner_id = ? AND status = 'FINISHED'"
+            );
+            $scoreStmt->execute([(int)$pid]);
+            $totalScore = (int)$scoreStmt->fetchColumn();
+
+
+            $upsert = $this->db->prepare(
+                "INSERT INTO tbl_standings (player_id, player_name, total_score)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE player_name = VALUES(player_name), total_score = VALUES(total_score)"
+            );
+            $upsert->execute([(int)$pid, $playerName, $totalScore]);
+        }
+
+        return true;
     }
 
     public function updateUser($id, $fname, $lname, $age, $rating) {
