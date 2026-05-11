@@ -38,8 +38,8 @@ for ($r = 1; $r <= 7; $r++) {
         $roundPts[$r][] = (float)$stmt->fetchColumn();
     }
 }
-// ── Cumulative pts per round for line chart ───────────────
-$cumData = array_fill(0, count($top5ids), []); // [playerIdx][round] = cumulative
+
+$cumData = array_fill(0, count($top5ids), []); 
 for ($i = 0; $i < count($top5ids); $i++) {
     $cum = 0;
     for ($r = 1; $r <= 7; $r++) {
@@ -47,16 +47,16 @@ for ($i = 0; $i < count($top5ids); $i++) {
         $cumData[$i][] = round($cum, 1);
     }
 }
-// ── Win rate per player ───────────────────────────────────
+//  Win rate per player 
 $winRateLabels = array_map(fn($s) => strtoupper($s['firstName']), $standings);
 $winRateData   = array_map(function($s) {
     if ($s['games_played'] == 0) return 0;
     return round($s['wins'] / $s['games_played'] * 100, 1);
 }, $standings);
-// ── Draws & decisive games ────────────────────────────────
+// Draws & decisive games
 $decisive = (int)$db->query("SELECT COUNT(*) FROM tbl_pairing WHERE status='FINISHED' AND p1_score != p2_score")->fetchColumn();
 $draws    = $totalMatches - $decisive;
-// ── Age distribution ──────────────────────────────────────
+// Age distribution 
 $ageRows = $db->query("SELECT age FROM tbl_players")->fetchAll(PDO::FETCH_COLUMN);
 $ageBuckets = ['U18' => 0, '18-25' => 0, '26-35' => 0, '36-50' => 0, '50+' => 0];
 foreach ($ageRows as $age) {
@@ -67,7 +67,7 @@ foreach ($ageRows as $age) {
     elseif ($age <= 50)  $ageBuckets['36-50']++;
     else                 $ageBuckets['50+']++;
 }
-// ── Rating distribution ───────────────────────────────────
+//  Rating distribution
 $ratingRows = $db->query("SELECT rating FROM tbl_players ORDER BY rating ASC")->fetchAll(PDO::FETCH_COLUMN);
 $ratingLabels = array_map(fn($s) => strtoupper($s['firstName']), $standings);
 $ratingData   = array_map(fn($s) => (int)$s['rating'], $standings);
@@ -113,7 +113,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             min-height: 100vh;
             color: white;
         }
-        /* ── HEADER ─────────────────────────── */
+       
         .top-bar {
             display: flex;
             align-items: center;
@@ -190,7 +190,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             letter-spacing: 1.5px;
             margin-bottom: 28px;
         }
-        /* ── STAT CARDS ──────────────────────── */
+      
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -245,10 +245,10 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(212,130,74,0.15);
         }
-        /* ── CHART GRIDS ─────────────────────── */
+     
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        /* ── LEADERBOARD TABLE ───────────────── */
+   
         .lb-table { width: 100%; border-collapse: collapse; }
         .lb-table th {
             font-size: 10px;
@@ -386,7 +386,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
                 </tbody>
             </table>
         </div>
-        <!-- Right column: donut + decisive/draws donut -->
+    
         <div>
             <div class="glass-card">
                 <div class="card-title">Gender Ratio</div>
@@ -402,14 +402,14 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             </div>
         </div>
     </div>
-    <!-- ROW 2: Cumulative points line chart -->
+
     <div class="glass-card">
         <div class="card-title">Top 5 — Cumulative Points by Round</div>
         <div style="position:relative; height:280px;">
             <canvas id="lineChart"></canvas>
         </div>
     </div>
-    <!-- ROW 3: Bar chart (all players) + Age distribution -->
+
     <div class="grid-2">
         <div class="glass-card">
             <div class="card-title">Points — All Players</div>
@@ -452,7 +452,7 @@ const tooltipDefaults = {
     padding: 12,
 };
 document.addEventListener('DOMContentLoaded', function() {
-    // ── Gender donut ──────────────────────────────────────
+
     new Chart(document.getElementById('genderChart').getContext('2d'), {
         type: 'doughnut',
         data: {
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    // ── Decisive vs Draws donut ───────────────────────────
+    //  Decisive vs Draws donut 
     new Chart(document.getElementById('resultChart').getContext('2d'), {
         type: 'doughnut',
         data: {
@@ -516,7 +516,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    // ── Cumulative line chart ─────────────────────────────
+    //  Cumulative line chart 
     const top5Names = <?= json_encode($top5names) ?>;
     const cumData   = <?= json_encode($cumData) ?>;
     const lineDatasets = top5Names.map((name, i) => ({
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    // ── All-player bar chart ──────────────────────────────
+    //  All-player bar chart 
     const allNames = <?= json_encode(array_map(fn($s) => strtoupper($s['firstName']), $standings)) ?>;
     const allPts   = <?= json_encode(array_column($standings, 'total_pts')) ?>;
     new Chart(document.getElementById('barChart').getContext('2d'), {
@@ -578,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    // ── Age distribution bar ──────────────────────────────
+    //  Age distribution bar 
     const ageBuckets = <?= json_encode(array_values($ageBuckets)) ?>;
     const ageLabels  = <?= json_encode(array_keys($ageBuckets)) ?>;
     new Chart(document.getElementById('ageChart').getContext('2d'), {
@@ -608,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ── Win rate horizontal bar ───────────────────────────
+    //  Win rate horizontal bar
     const wrNames = <?= json_encode(array_values(array_map(fn($s) => strtoupper($s['firstName']), array_filter($standings, fn($s) => $s['games_played'] > 0)))) ?>;
     const wrData  = <?= json_encode(array_values(array_map(fn($s) => (float)($s['games_played'] > 0 ? round($s['wins'] / $s['games_played'] * 100, 1) : 0), array_filter($standings, fn($s) => $s['games_played'] > 0)))) ?>;
     new Chart(document.getElementById('winRateChart').getContext('2d'), {
@@ -639,7 +639,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ── Rating distribution bar ───────────────────────────
+    //  Rating distribution bar 
     const ratingLabels = <?= json_encode($ratingLabels) ?>;
     const ratingData   = <?= json_encode($ratingData) ?>;
     new Chart(document.getElementById('ratingChart').getContext('2d'), {
