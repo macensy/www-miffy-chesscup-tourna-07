@@ -140,8 +140,6 @@ if ($choice == 'updateScore') {
     exit();
 }
 
-
-
 if ($choice == 'resetTournament') {
     $res = $manager->resetTournamentFunc();
     echo ($res === true) ? "true" : $res;
