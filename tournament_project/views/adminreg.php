@@ -15,11 +15,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'DM Sans', sans-serif;
-            background: linear-gradient(rgba(18,8,4,0.88), rgba(18,8,4,0.88)),
-                        url('https://i.pinimg.com/1200x/3e/61/10/3e611090fe833da3f7479bbe90e04df5.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -267,6 +262,43 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+/* ── Themed SweetAlert helper (matches service.js) ── */
+function miffySwal(opts) {
+    return Swal.fire(Object.assign({
+        background: '#1C0A04',
+        color: '#FAF0DC',
+        confirmButtonColor: '#D4824A',
+        cancelButtonColor: '#3B1F0E',
+        iconColor: '#E8A96A',
+        customClass: {
+            popup:            'miffy-swal-popup',
+            title:            'miffy-swal-title',
+            htmlContainer:    'miffy-swal-html',
+            confirmButton:    'miffy-swal-confirm',
+            cancelButton:     'miffy-swal-cancel',
+            timerProgressBar: 'miffy-swal-timer'
+        }
+    }, opts));
+}
+(function() {
+    if (document.getElementById('miffy-swal-style')) return;
+    const s = document.createElement('style');
+    s.id = 'miffy-swal-style';
+    s.textContent = `
+        .miffy-swal-popup  { border: 1px solid rgba(212,130,74,0.35) !important; border-radius: 14px !important; box-shadow: 0 8px 40px rgba(0,0,0,0.7) !important; }
+        .miffy-swal-title  { color: #FAF0DC !important; font-family: Georgia, serif !important; letter-spacing: 1px !important; }
+        .miffy-swal-html   { color: rgba(250,240,220,0.75) !important; }
+        .miffy-swal-confirm{ font-weight: bold !important; letter-spacing: 1px !important; }
+        .miffy-swal-cancel { font-weight: bold !important; letter-spacing: 1px !important; }
+        .miffy-swal-timer  { background: #D4824A !important; }
+        .swal2-icon.swal2-warning { border-color: #E8A96A !important; color: #E8A96A !important; }
+        .swal2-icon.swal2-error   { border-color: #c0392b !important; color: #c0392b !important; }
+        .swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(212,130,74,0.3) !important; }
+        .swal2-icon.swal2-success [class^=swal2-success-line] { background-color: #D4824A !important; }
+    `;
+    document.head.appendChild(s);
+})();
+
 // ── Mode switcher ──────────────────────────────────────
 function switchMode(mode) {
     document.getElementById('panelLogin').classList.toggle('active', mode === 'login');
@@ -300,12 +332,12 @@ function checkStrength(val) {
 
 // ── Password rules validator ───────────────────────────
 function validatePassword(pass) {
-    if (pass.length < 8)            { Swal.fire('Too Short',     'Password must be at least 8 characters.',              'warning'); return false; }
-    if (pass.length > 32)           { Swal.fire('Too Long',      'Password must not exceed 32 characters.',              'warning'); return false; }
-    if (!/[A-Z]/.test(pass))        { Swal.fire('Weak Password', 'Must include at least 1 uppercase letter (A-Z).',      'warning'); return false; }
-    if (!/[a-z]/.test(pass))        { Swal.fire('Weak Password', 'Must include at least 1 lowercase letter (a-z).',      'warning'); return false; }
-    if (!/[0-9]/.test(pass))        { Swal.fire('Weak Password', 'Must include at least 1 number (0-9).',                'warning'); return false; }
-    if (!/[^A-Za-z0-9]/.test(pass)) { Swal.fire('Weak Password', 'Must include at least 1 special character (@, #, !).','warning'); return false; }
+    if (pass.length < 8)            { miffySwal({ title: 'Too Short',     text: 'Password must be at least 8 characters.',               icon: 'warning' }); return false; }
+    if (pass.length > 32)           { miffySwal({ title: 'Too Long',      text: 'Password must not exceed 32 characters.',               icon: 'warning' }); return false; }
+    if (!/[A-Z]/.test(pass))        { miffySwal({ title: 'Weak Password', text: 'Must include at least 1 uppercase letter (A-Z).',       icon: 'warning' }); return false; }
+    if (!/[a-z]/.test(pass))        { miffySwal({ title: 'Weak Password', text: 'Must include at least 1 lowercase letter (a-z).',       icon: 'warning' }); return false; }
+    if (!/[0-9]/.test(pass))        { miffySwal({ title: 'Weak Password', text: 'Must include at least 1 number (0-9).',                 icon: 'warning' }); return false; }
+    if (!/[^A-Za-z0-9]/.test(pass)) { miffySwal({ title: 'Weak Password', text: 'Must include at least 1 special character (@, #, !).', icon: 'warning' }); return false; }
     return true;
 }
 
@@ -316,10 +348,10 @@ function loginAdmin() {
     let key  = $('#LoginKey').val();
 
     if (!em || !pass || !key) {
-        Swal.fire('Wait', 'Please fill in all fields.', 'warning'); return;
+        miffySwal({ title: 'Wait', text: 'Please fill in all fields.', icon: 'warning' }); return;
     }
     if (key !== 'miffyandboris') {
-        Swal.fire('Unauthorized', 'Invalid Secret Arbiter Key!', 'error'); return;
+        miffySwal({ title: 'Unauthorized', text: 'Invalid Secret Arbiter Key!', icon: 'error' }); return;
     }
 
     $.post('../controllers/controller.php', {
@@ -327,16 +359,16 @@ function loginAdmin() {
     }, function(res) {
         res = res.trim();
         if (res === 'true') {
-            Swal.fire({ title: 'Welcome, Arbiter!', icon: 'success', timer: 1400, showConfirmButton: false })
+            miffySwal({ title: 'Welcome, Arbiter!', icon: 'success', timer: 1400, showConfirmButton: false, timerProgressBar: true })
                 .then(() => window.location.href = 'dashboardpage.php');
         } else if (res === 'wrong_password') {
-            Swal.fire('Incorrect Password', 'The password you entered is wrong.', 'error');
+            miffySwal({ title: 'Incorrect Password', text: 'The password you entered is wrong.', icon: 'error' });
         } else if (res === 'not_found') {
-            Swal.fire('Not Found', 'No admin account found with that email.', 'error');
+            miffySwal({ title: 'Not Found', text: 'No admin account found with that email.', icon: 'error' });
         } else {
-            Swal.fire('Error', res, 'error');
+            miffySwal({ title: 'Error', text: res, icon: 'error' });
         }
-    }).fail(() => Swal.fire('System Error', 'Cannot connect to server.', 'error'));
+    }).fail(() => miffySwal({ title: 'System Error', text: 'Cannot connect to server.', icon: 'error' }));
 }
 
 // ── Register new admin ─────────────────────────────────
@@ -349,20 +381,20 @@ function registerAdmin() {
     let key  = $('#RegKey').val();
 
     if (!fn || !ln || !em || !pass || !conf || !key) {
-        Swal.fire('Wait', 'Please fill in all fields.', 'warning'); return;
+        miffySwal({ title: 'Wait', text: 'Please fill in all fields.', icon: 'warning' }); return;
     }
     if (fn.length < 2 || ln.length < 2) {
-        Swal.fire('Invalid Name', 'Names must be at least 2 characters.', 'warning'); return;
+        miffySwal({ title: 'Invalid Name', text: 'Names must be at least 2 characters.', icon: 'warning' }); return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
-        Swal.fire('Invalid Email', 'Please enter a valid email address.', 'error'); return;
+        miffySwal({ title: 'Invalid Email', text: 'Please enter a valid email address.', icon: 'error' }); return;
     }
     if (!validatePassword(pass)) return;
     if (pass !== conf) {
-        Swal.fire('Mismatch', 'Passwords do not match!', 'error'); return;
+        miffySwal({ title: 'Mismatch', text: 'Passwords do not match!', icon: 'error' }); return;
     }
     if (key !== 'miffyandboris') {
-        Swal.fire('Unauthorized', 'Invalid Secret Arbiter Key!', 'error'); return;
+        miffySwal({ title: 'Unauthorized', text: 'Invalid Secret Arbiter Key!', icon: 'error' }); return;
     }
 
     $.post('../controllers/controller.php', {
@@ -370,20 +402,22 @@ function registerAdmin() {
     }, function(res) {
         res = res.trim();
         if (res === 'true') {
-            Swal.fire({
+            miffySwal({
                 title: 'Admin Created!',
                 text: 'Welcome, Arbiter. Redirecting to portal...',
                 icon: 'success',
                 timer: 1500,
-                showConfirmButton: false
+                showConfirmButton: false,
+                timerProgressBar: true
             }).then(() => window.location.href = 'dashboardpage.php');
         } else if (res === 'email_taken') {
-            Swal.fire('Email Taken', 'An admin with that email already exists.', 'error');
+            miffySwal({ title: 'Email Taken', text: 'An admin with that email already exists.', icon: 'error' });
         } else {
-            Swal.fire('Error', res, 'error');
+            miffySwal({ title: 'Error', text: res, icon: 'error' });
         }
-    }).fail(() => Swal.fire('System Error', 'Cannot connect to server.', 'error'));
+    }).fail(() => miffySwal({ title: 'System Error', text: 'Cannot connect to server.', icon: 'error' }));
 }
 </script>
+<script src="../script/fx.js"></script>
 </body>
 </html>

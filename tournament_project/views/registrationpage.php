@@ -24,11 +24,13 @@ $players = $manager->getUser();
         * { box-sizing: border-box; }
         body {
             font-family: 'DM Sans', sans-serif; margin: 0;
-            background: linear-gradient(rgba(18,8,4,0.88), rgba(18,8,4,0.88)),
-                        url('https://i.pinimg.com/1200x/3e/61/10/3e611090fe833da3f7479bbe90e04df5.jpg');
-            background-size: cover; background-position: center; background-attachment: fixed;
+            background: #0a0301;
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            padding: 28px 16px; color: white;
+            padding: 28px 16px; color: white; position: relative;
+        }
+        #bgCanvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: -1;
         }
         .reg-wrap {
             width: 100%; max-width: 960px;
@@ -106,6 +108,7 @@ $players = $manager->getUser();
     </style>
 </head>
 <body>
+<canvas id="bgCanvas"></canvas>
 <div class="reg-wrap">
     <div class="reg-grid">
 
@@ -240,5 +243,45 @@ function checkStrength(val) {
     text.textContent = lvl.t; text.style.color = lvl.bg;
 }
 </script>
+<script>
+(function(){
+    const canvas=document.getElementById('bgCanvas'),ctx=canvas.getContext('2d');
+    const pieces=['♟','♜','♞','♝','♛','♚'];
+    let particles=[],W,H,time=0;
+    function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+    resize();window.addEventListener('resize',resize);
+    for(let i=0;i<22;i++)particles.push({
+        x:Math.random()*1400,y:Math.random()*900,
+        symbol:pieces[Math.floor(Math.random()*6)],
+        size:13+Math.random()*24,speed:0.12+Math.random()*0.26,
+        drift:(Math.random()-.5)*.18,alpha:.025+Math.random()*.06,
+        rot:Math.random()*Math.PI*2,rotSpeed:(Math.random()-.5)*.005,
+        wave:Math.random()*Math.PI*2,waveAmp:0.3+Math.random()*0.5
+    });
+    function draw(){
+        time+=.004;
+        const g=ctx.createRadialGradient(W*.5,H*.4,0,W*.5,H*.4,W*.85);
+        g.addColorStop(0,'rgba(38,17,7,.97)');g.addColorStop(.55,'rgba(20,8,3,.98)');g.addColorStop(1,'rgba(10,3,1,1)');
+        ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+        [{x:W*(.2+.08*Math.sin(time*.7)),y:H*(.25+.07*Math.cos(time*.5)),r:W*.3,c:`rgba(107,58,42,${.05+.02*Math.sin(time)})`},
+         {x:W*(.82+.06*Math.cos(time*.6)),y:H*(.65+.08*Math.sin(time*.4)),r:W*.25,c:`rgba(181,98,42,${.045+.015*Math.cos(time*1.2)})`},
+         {x:W*(.5+.05*Math.sin(time*.9)),y:H*(.9+.04*Math.cos(time*.8)),r:W*.2,c:`rgba(212,130,74,${.035+.01*Math.sin(time*1.5)})`}
+        ].forEach(o=>{const og=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);og.addColorStop(0,o.c);og.addColorStop(1,'transparent');ctx.fillStyle=og;ctx.fillRect(0,0,W,H);});
+        ctx.textBaseline='middle';
+        particles.forEach(p=>{
+            p.wave+=.018;
+            ctx.save();ctx.translate(p.x%W,p.y%H);ctx.rotate(p.rot);
+            ctx.globalAlpha=p.alpha*(0.7+0.3*Math.sin(p.wave));
+            ctx.fillStyle='#E8A96A';ctx.font=`${p.size}px serif`;ctx.fillText(p.symbol,0,0);ctx.restore();
+            p.y-=p.speed;p.x+=p.drift+Math.sin(p.wave)*p.waveAmp;p.rot+=p.rotSpeed;
+            if(p.y<-60){p.y=H+60;p.x=Math.random()*W;}
+            if(p.x<-60)p.x=W+60;if(p.x>W+60)p.x=-60;
+        });
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+</script>
+<script src="../script/fx.js"></script>
 </body>
 </html>

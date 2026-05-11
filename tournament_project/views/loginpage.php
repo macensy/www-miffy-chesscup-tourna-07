@@ -19,9 +19,6 @@ if (isset($_SESSION['user'])) { header("Location: dashboardpage.php"); exit(); }
         * { box-sizing: border-box; }
         body {
             font-family: 'DM Sans', sans-serif; margin: 0; padding: 0;
-            background: linear-gradient(rgba(18,8,4,0.88), rgba(18,8,4,0.88)),
-                        url('https://i.pinimg.com/1200x/3e/61/10/3e611090fe833da3f7479bbe90e04df5.jpg');
-            background-size: cover; background-position: center; background-attachment: fixed;
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
         }
         .login-card {
@@ -87,5 +84,6 @@ if (isset($_SESSION['user'])) { header("Location: dashboardpage.php"); exit(); }
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../script/service.js"></script>
+<script src="../script/fx.js"></script>
 </body>
 </html>
