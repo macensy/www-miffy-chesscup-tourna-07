@@ -1,7 +1,7 @@
 
 
 (function () {
-  /* ── 1. GLOWING CURSOR ─────────────────────────────────── */
+
   const cursorDot = document.createElement('div');
   cursorDot.id = 'fx-cursor-dot';
   document.body.appendChild(cursorDot);
@@ -37,7 +37,6 @@
   });
 
 
-  /* ── 2. BUTTON RIPPLE ──────────────────────────────────── */
   document.addEventListener('click', e => {
     const btn = e.target.closest('button, .btn-login, .btn-register, .btn-admin, .btn-generate, .btn-reset, .round-pill, .tab-btn, .mode-btn');
     if (!btn) return;
@@ -64,8 +63,6 @@
   rippleStyle.textContent = `@keyframes fxRipple { to { transform:scale(1); opacity:0; } }`;
   document.head.appendChild(rippleStyle);
 
-
-  /* ── 3. INPUT FOCUS GLOW ───────────────────────────────── */
   document.querySelectorAll('input.field-input, select.field-select').forEach(el => {
     el.addEventListener('focus', () => {
       el.style.boxShadow = '0 0 0 3px rgba(212,130,74,0.18), 0 0 16px rgba(212,130,74,0.12)';
@@ -78,7 +75,6 @@
   });
 
 
-  /* ── 4. CARD TILT (glass-card elements) ────────────────── */
   document.querySelectorAll('.glass-card, .stat-card, .login-card, .admin-card, .reg-wrap').forEach(card => {
     card.addEventListener('mousemove', e => {
       const r    = card.getBoundingClientRect();
@@ -98,8 +94,6 @@
     });
   });
 
-
-  /* ── 5. SCROLL REVEAL ──────────────────────────────────── */
   const revealStyle = document.createElement('style');
   revealStyle.textContent = `
     .fx-reveal { opacity:0; transform:translateY(28px); transition:opacity 0.55s ease, transform 0.55s ease; }
@@ -120,8 +114,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initReveal);
   else initReveal();
 
-
-  /* ── 6. ANIMATED BACKGROUND CANVAS (if not already present) ── */
   if (!document.getElementById('bgCanvas')) {
     const canvas = document.createElement('canvas');
     canvas.id = 'bgCanvas';
