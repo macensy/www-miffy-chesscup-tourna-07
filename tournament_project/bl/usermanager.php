@@ -12,19 +12,14 @@ class usermanager {
         $this->db = $database->connectDB();
     }
 
-    // ── tbl_players ───────────────────────────────────────────────────────────
-
     public function getUser() {
         return $this->db->query("SELECT * FROM tbl_players ORDER BY userID ASC")->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    // ── tbl_admins ────────────────────────────────────────────────────────────
 
     public function getAdmins() {
         return $this->db->query("SELECT * FROM tbl_admins ORDER BY adminID ASC")->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // ── Leaderboards / WDL ────────────────────────────────────────────────────
 
     public function getLeaderboards() {
         $sql = "SELECT p.*,
@@ -156,8 +151,6 @@ class usermanager {
         return $this->db->prepare("DELETE FROM tbl_players WHERE userID=?")->execute([(int)$id]);
     }
 
-    // ── Auth ──────────────────────────────────────────────────────────────────
-
     public function login($email, $password) {
         $stmt = $this->db->prepare("SELECT * FROM tbl_players WHERE email = ?");
         $stmt->execute([$email]);
@@ -225,8 +218,6 @@ class usermanager {
     public function resetTournamentFunc() {
         return $this->resetTournament();
     }
-
-    // ── Logs ──────────────────────────────────────────────────────────────────
 
     public function getLogs() {
         try {

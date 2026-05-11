@@ -444,11 +444,7 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
 
     </div>
 </div>
-
-<!-- ═══════════ PLAYER WIDGETS (Players only) ═══════════ -->
 <?php if(!$isAdmin):
-
-/* ── Gather player-specific data ──────────────────────────────────── */
 
 // 1. Player's own WDL + rank
 $myID     = (int)$user['userID'];
@@ -472,7 +468,6 @@ foreach($wdlData as $w) {
     }
 }
 
-// 2. Next opponent for this player (latest round with a PENDING match)
 $nextOpponent = null;
 $nextMatchRound = null;
 $myColor = null;
@@ -502,9 +497,6 @@ try {
     }
 } catch(Exception $e) {}
 
-// 3. Tournament countdown — next round unlock (based on current server time + round cadence)
-//    Since no match_time col exists, we show time-until-midnight as a natural daily reset,
-//    or "waiting for results" if there are pending matches in the current round.
 $countdownTarget = null;
 $countdownLabel  = '';
 try {
@@ -535,7 +527,6 @@ try {
     $countdownLabel  = 'Next update in';
 }
 
-// 4. Daily puzzle index (cycles by day of year, 0-indexed into JS puzzle array)
 $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
 
 ?>
@@ -662,7 +653,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
         </div>
     </div>
 
-    <!-- ── Row 2: Daily Chess Puzzle ───────────────────────────────── -->
     <div class="glass-card" style="padding:28px 24px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
             <div class="card-title" style="margin-bottom:0;padding-bottom:0;border:none;">♟ Daily Chess Puzzle</div>
@@ -728,7 +718,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
 
 </div>
 
-<!-- ═══ COUNTDOWN SCRIPT ═══ -->
 <script>
 (function(){
     const target = <?= (int)$countdownTarget ?> * 1000;
@@ -836,7 +825,6 @@ function mk(){return Array.from({length:8},()=>Array(8).fill(null));}
 let puzzleIdx = <?= (int)$puzzleOfDay ?>;
 let board, selected, step, moveCount, solveAttempts, solved, revealUsed;
 
-// ── Persistent stats (session storage — no backend needed) ───────────
 const TODAY = new Date().toDateString();
 let stats = JSON.parse(sessionStorage.getItem('pz_stats') || 'null') || {date:TODAY, solved:0, streak:0, attempts:0, correct:0};
 if(stats.date !== TODAY) stats = {date:TODAY, solved:0, streak:0, attempts:0, correct:0};
@@ -1077,10 +1065,10 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
-<!-- ═══════════════════ CONFETTI + PODIUM ═══════════════════ -->
+//confetti podium
+
 <script>
 <?php
-// Check if tournament is fully done (7 rounds, all finished)
 $tournamentComplete = false;
 $podiumData = [];
 try {
@@ -1210,7 +1198,6 @@ if (TOURNAMENT_COMPLETE) {
     });
 }
 
-// ── STAT CARD COUNT-UP ────────────────────────────────────
 window.addEventListener('load', () => {
     document.querySelectorAll('.stat-num').forEach(el => {
         const raw = parseInt(el.textContent.replace(/\D/g,''));
@@ -1226,7 +1213,7 @@ window.addEventListener('load', () => {
     });
 });
 
-// ── PAIRING ROW: highlight winner cell ───────────────────
+
 document.querySelectorAll('.pairing-row').forEach(row => {
     const cells = row.querySelectorAll('.player-cell');
     const scores = row.querySelectorAll('.score-display');
@@ -1238,7 +1225,6 @@ document.querySelectorAll('.pairing-row').forEach(row => {
     }
 });
 
-// ── STANDINGS TABLE: animate rank numbers ────────────────
 document.querySelectorAll('.rank-num').forEach((el, i) => {
     el.style.opacity = '0';
     el.style.transform = 'translateX(-8px)';

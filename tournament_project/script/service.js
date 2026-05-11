@@ -18,7 +18,6 @@ $(document).ready(function() {
     }
 });
 
-/* ── Themed SweetAlert helper ── */
 function miffySwal(opts) {
     return Swal.fire(Object.assign({
         background: '#1C0A04',
