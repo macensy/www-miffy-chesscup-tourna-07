@@ -23,9 +23,12 @@ class usermanager {
 
     public function getLeaderboards() {
         $sql = "SELECT p.*,
-                (SELECT IFNULL(SUM(p1_score), 0) FROM tbl_pairing WHERE player1_id = p.userID) +
-                (SELECT IFNULL(SUM(p2_score), 0) FROM tbl_pairing WHERE player2_id = p.userID) as total_pts
+                IFNULL(SUM(CASE WHEN pair.player1_id = p.userID THEN pair.p1_score
+                                WHEN pair.player2_id = p.userID THEN pair.p2_score
+                                ELSE 0 END), 0) AS total_pts
                 FROM tbl_players p
+                LEFT JOIN tbl_pairing pair ON pair.player1_id = p.userID OR pair.player2_id = p.userID
+                GROUP BY p.userID
                 ORDER BY total_pts DESC";
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }

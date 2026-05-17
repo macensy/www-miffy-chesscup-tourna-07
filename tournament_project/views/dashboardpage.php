@@ -20,8 +20,7 @@ $maxRoundsReached    = false;
 $prevRoundPending    = false;
 $existingRounds      = [];
 try {
-    $db   = (new Database())->connectDB();
-    // Get all existing round numbers
+    $db   = (new Database())->connectDB(); // reuses singleton
     $rRows = $db->query("SELECT DISTINCT round_num FROM tbl_pairing ORDER BY round_num ASC")->fetchAll(PDO::FETCH_COLUMN);
     $existingRounds = $rRows;
 
@@ -29,9 +28,7 @@ try {
     $row  = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($row && $row['max_r']) {
         $nextRoundToGenerate = (int)$row['max_r'] + 1;
-        // Check if max rounds reached
         if ($nextRoundToGenerate > 7) $maxRoundsReached = true;
-        // Check if latest round still has pending matches
         $pCheck = $db->prepare("SELECT COUNT(*) FROM tbl_pairing WHERE round_num = ? AND status != 'FINISHED'");
         $pCheck->execute([(int)$row['max_r']]);
         if ($pCheck->fetchColumn() > 0) $prevRoundPending = true;
@@ -41,8 +38,8 @@ try {
 
 $roundProgress = [];
 try {
-    $db2  = (new Database())->connectDB();
-    $rows = $db2->query("SELECT round_num, 
+    $db2 = (new Database())->connectDB(); // reuses singleton
+    $rows = $db2->query("SELECT round_num,
                           SUM(CASE WHEN status='FINISHED' THEN 1 ELSE 0 END) as finished,
                           SUM(CASE WHEN status!='FINISHED' THEN 1 ELSE 0 END) as pending
                           FROM tbl_pairing GROUP BY round_num ORDER BY round_num ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -57,7 +54,6 @@ foreach (array_slice($standings, 0, 5) as $s) {
     $chartData[]   = (float)$s['total_pts'];
 }
 
-// WDL Chart (Top 8 by wins)
 $wdlLabels = $wdlWins = $wdlDraws = $wdlLosses = [];
 foreach (array_slice($wdlData, 0, 8) as $w) {
     $wdlLabels[] = strtoupper($w['firstName']);
@@ -112,7 +108,6 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
             width: 100%; height: 100%;
             z-index: 9999; pointer-events: none;
         }
-        /* Podium overlay */
         #podiumOverlay {
             display: none;
             position: fixed; inset: 0;
@@ -240,7 +235,6 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
         .no-matches { text-align: center; padding: 50px 20px; color: rgba(255,255,255,0.18); font-size: 13px; letter-spacing: 1px; }
         .chart-title { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--caramel); text-align: center; margin-bottom: 20px; }
 
-        /* WDL Legend */
         .wdl-legend { display: flex; justify-content: center; gap: 18px; margin-bottom: 14px; }
         .wdl-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
         .wdl-legend span { font-size: 12px; color: rgba(255,255,255,0.55); letter-spacing: 1px; }
@@ -446,7 +440,7 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
 </div>
 <?php if(!$isAdmin):
 
-// 1. Player's own WDL + rank
+// Player's own WDL + rank
 $myID     = (int)$user['userID'];
 $myWDL    = ['wins'=>0,'draws'=>0,'losses'=>0,'total_pts'=>0,'rank'=>'—'];
 $myRating = htmlspecialchars($user['rating'] ?? '—');
@@ -472,7 +466,7 @@ $nextOpponent = null;
 $nextMatchRound = null;
 $myColor = null;
 try {
-    $dbNext = (new Database())->connectDB();
+    $dbNext = (new Database())->connectDB(); // reuses singleton
     $stmtOpp = $dbNext->prepare("
         SELECT m.*, p1.firstName AS p1Name, p2.firstName AS p2Name
         FROM tbl_pairing m
@@ -500,11 +494,9 @@ try {
 $countdownTarget = null;
 $countdownLabel  = '';
 try {
-    $dbCd = (new Database())->connectDB();
-    // If there are pending matches in current max round → waiting for results
+    $dbCd = (new Database())->connectDB(); // reuses singleton
     $maxR = (int)$dbCd->query("SELECT COALESCE(MAX(round_num),0) FROM tbl_pairing")->fetchColumn();
     if($maxR > 0) {
-        $pendingInMax = (int)$dbCd->prepare("SELECT COUNT(*) FROM tbl_pairing WHERE round_num=? AND status!='FINISHED'")->execute([$maxR]);
         $stmtPend = $dbCd->prepare("SELECT COUNT(*) FROM tbl_pairing WHERE round_num=? AND status!='FINISHED'");
         $stmtPend->execute([$maxR]);
         $pendingInMax = (int)$stmtPend->fetchColumn();
@@ -1065,14 +1057,13 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
-//confetti podium
 
 <script>
 <?php
 $tournamentComplete = false;
 $podiumData = [];
 try {
-    $dbCheck = (new Database())->connectDB();
+    $dbCheck = (new Database())->connectDB(); // reuses singleton
     $roundCount = (int)$dbCheck->query("SELECT COUNT(DISTINCT round_num) FROM tbl_pairing")->fetchColumn();
     $pendingCount = (int)$dbCheck->query("SELECT COUNT(*) FROM tbl_pairing WHERE status != 'FINISHED'")->fetchColumn();
     if ($roundCount >= 7 && $pendingCount === 0) {
@@ -1092,7 +1083,7 @@ try {
 const TOURNAMENT_COMPLETE = <?= $tournamentComplete ? 'true' : 'false' ?>;
 const PODIUM_DATA = <?= json_encode($podiumData) ?>;
 
-// ─── Confetti ───
+// Confetti 
 const confettiCanvas = document.getElementById('confettiCanvas');
 const cctx = confettiCanvas.getContext('2d');
 let confettiParticles = [];
