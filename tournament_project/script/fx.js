@@ -2,39 +2,65 @@
 
 (function () {
 
-  const cursorDot = document.createElement('div');
-  cursorDot.id = 'fx-cursor-dot';
-  document.body.appendChild(cursorDot);
-
+  // ── CURSOR TRAIL (same as landing page) ──────────────────
   const cursorStyle = document.createElement('style');
   cursorStyle.textContent = `
-    *, *::before, *::after { cursor: none !important; }
-    #fx-cursor-dot {
-      position: fixed; z-index: 99999; pointer-events: none;
-      width: 10px; height: 10px; border-radius: 50%;
-      background: radial-gradient(circle, #F5C98A, #D4824A);
-      box-shadow: 0 0 10px 3px rgba(212,130,74,0.7), 0 0 22px 8px rgba(212,130,74,0.25);
+    .fx-cursor-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #D4824A;
+      position: fixed; pointer-events: none;
+      z-index: 99999; opacity: 0;
       transform: translate(-50%, -50%);
-      transition: width 0.12s, height 0.12s;
-      top: 0; left: 0;
+      transition: opacity 0.3s;
     }
-    #fx-cursor-dot.clicking { width: 14px; height: 14px; background: #F5C98A; }
-    #fx-cursor-dot.hovering { width: 14px; height: 14px; box-shadow: 0 0 14px 5px rgba(212,130,74,0.85), 0 0 30px 10px rgba(212,130,74,0.3); }
   `;
   document.head.appendChild(cursorStyle);
 
-  document.addEventListener('mousemove', e => {
-    cursorDot.style.left = e.clientX + 'px';
-    cursorDot.style.top  = e.clientY + 'px';
+  const dots = [1, 2, 3].map(() => {
+    const d = document.createElement('div');
+    d.className = 'fx-cursor-dot';
+    document.body.appendChild(d);
+    return d;
   });
-  document.addEventListener('mousedown', () => cursorDot.classList.add('clicking'));
-  document.addEventListener('mouseup',   () => cursorDot.classList.remove('clicking'));
+  const positions = dots.map(() => ({ x: 0, y: 0 }));
+  let mouse = { x: 0, y: 0 };
+  let active = false;
 
-  document.addEventListener('mouseover', e => {
-    const isInteractive = ['A','BUTTON','INPUT','SELECT','LABEL'].includes(e.target.tagName) ||
-                          e.target.closest('button, a, [onclick], .btn-login, .btn-register, .btn-admin, .mode-btn, .round-pill, .btn-save, .btn-generate, .btn-reset, .tab-btn');
-    cursorDot.classList.toggle('hovering', !!isInteractive);
+  document.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    if (!active) {
+      active = true;
+      dots.forEach(d => d.style.opacity = '0.7');
+      animateCursor();
+    }
   });
+
+  document.addEventListener('mouseleave', () => {
+    dots.forEach(d => d.style.opacity = '0');
+    active = false;
+  });
+
+  function animateCursor() {
+    if (!active) return;
+    positions[0].x += (mouse.x - positions[0].x) * 0.35;
+    positions[0].y += (mouse.y - positions[0].y) * 0.35;
+    positions[1].x += (positions[0].x - positions[1].x) * 0.28;
+    positions[1].y += (positions[0].y - positions[1].y) * 0.28;
+    positions[2].x += (positions[1].x - positions[2].x) * 0.22;
+    positions[2].y += (positions[1].y - positions[2].y) * 0.22;
+
+    const sizes     = [6, 4, 3];
+    const opacities = [0.7, 0.45, 0.25];
+    dots.forEach((dot, i) => {
+      dot.style.left    = positions[i].x + 'px';
+      dot.style.top     = positions[i].y + 'px';
+      dot.style.width   = sizes[i] + 'px';
+      dot.style.height  = sizes[i] + 'px';
+      dot.style.opacity = opacities[i];
+    });
+    requestAnimationFrame(animateCursor);
+  }
 
 
   document.addEventListener('click', e => {
