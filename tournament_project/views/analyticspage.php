@@ -26,7 +26,7 @@ $standings = $db->query("
 
 $top5ids = array_slice(array_column($standings, 'userID'), 0, 5);
 $top5names = array_slice(array_map(fn($s) => strtoupper($s['firstName']), $standings), 0, 5);
-$roundPts = []; // [round][playerIdx] = pts
+$roundPts = [];
 for ($r = 1; $r <= 7; $r++) {
     $roundPts[$r] = [];
     foreach ($top5ids as $pid) {
@@ -39,7 +39,7 @@ for ($r = 1; $r <= 7; $r++) {
     }
 }
 
-$cumData = array_fill(0, count($top5ids), []); 
+$cumData = array_fill(0, count($top5ids), []);
 for ($i = 0; $i < count($top5ids); $i++) {
     $cum = 0;
     for ($r = 1; $r <= 7; $r++) {
@@ -47,16 +47,16 @@ for ($i = 0; $i < count($top5ids); $i++) {
         $cumData[$i][] = round($cum, 1);
     }
 }
-//  Win rate per player 
+
 $winRateLabels = array_map(fn($s) => strtoupper($s['firstName']), $standings);
 $winRateData   = array_map(function($s) {
     if ($s['games_played'] == 0) return 0;
     return round($s['wins'] / $s['games_played'] * 100, 1);
 }, $standings);
-// Draws & decisive games
+
 $decisive = (int)$db->query("SELECT COUNT(*) FROM tbl_pairing WHERE status='FINISHED' AND p1_score != p2_score")->fetchColumn();
 $draws    = $totalMatches - $decisive;
-// Age distribution 
+
 $ageRows = $db->query("SELECT age FROM tbl_players")->fetchAll(PDO::FETCH_COLUMN);
 $ageBuckets = ['U18' => 0, '18-25' => 0, '26-35' => 0, '36-50' => 0, '50+' => 0];
 foreach ($ageRows as $age) {
@@ -67,11 +67,11 @@ foreach ($ageRows as $age) {
     elseif ($age <= 50)  $ageBuckets['36-50']++;
     else                 $ageBuckets['50+']++;
 }
-//  Rating distribution
+
 $ratingRows = $db->query("SELECT rating FROM tbl_players ORDER BY rating ASC")->fetchAll(PDO::FETCH_COLUMN);
 $ratingLabels = array_map(fn($s) => strtoupper($s['firstName']), $standings);
 $ratingData   = array_map(fn($s) => (int)$s['rating'], $standings);
-// Chart palette
+
 $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4'];
 ?>
 <!DOCTYPE html>
@@ -113,7 +113,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             min-height: 100vh;
             color: white;
         }
-       
+
         .top-bar {
             display: flex;
             align-items: center;
@@ -173,7 +173,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             transition: 0.2s;
         }
         .btn-logout:hover { background: rgba(212,130,74,0.12); }
-        /* ── LAYOUT ──────────────────────────── */
+
         .page-wrap { padding: 28px 20px 0; max-width: 1100px; margin: 0 auto; }
         .page-heading {
             font-family: 'Cinzel', serif;
@@ -190,7 +190,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             letter-spacing: 1.5px;
             margin-bottom: 28px;
         }
-      
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -226,7 +226,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             text-transform: uppercase;
             color: rgba(255,255,255,0.4);
         }
-        /* ── GLASS CARDS ─────────────────────── */
+
         .glass-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
@@ -245,10 +245,10 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(212,130,74,0.15);
         }
-     
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-   
+
         .lb-table { width: 100%; border-collapse: collapse; }
         .lb-table th {
             font-size: 10px;
@@ -291,7 +291,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
     </style>
 </head>
 <body>
-<!-- NAV -->
+
 <div class="top-bar">
     <div class="brand-row">
         <img src="../assets/miffy.jpg" class="brand-logo" alt="logo">
@@ -313,7 +313,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
 <div class="page-wrap">
     <div class="page-heading">Analytics</div>
     <div class="page-sub">Tournament performance overview</div>
-    <!-- STAT CARDS -->
+
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-num"><?= $totalPlayers ?></div>
@@ -341,9 +341,9 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             <div class="stat-lbl">Draws</div>
         </div>
     </div>
-    <!-- ROW 1: Full leaderboard + Gender donut -->
+
     <div class="grid-2">
-        <!-- Full leaderboard table -->
+
         <div class="glass-card">
             <div class="card-title">Full Standings</div>
             <table class="lb-table">
@@ -386,7 +386,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
                 </tbody>
             </table>
         </div>
-    
+
         <div>
             <div class="glass-card">
                 <div class="card-title">Gender Ratio</div>
@@ -424,7 +424,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             </div>
         </div>
     </div>
-    <!-- ROW 4: Win rate + Rating distribution -->
+
     <div class="grid-2">
         <div class="glass-card">
             <div class="card-title">Win Rate by Player</div>
@@ -439,7 +439,7 @@ $palette = ['#D4824A','#F0C86A','#7B9E87','#A06B9A','#5B9BD5','#E07B7B','#8BC4C4
             </div>
         </div>
     </div>
-</div><!-- /page-wrap -->
+</div>
 <script>
 Chart.register(ChartDataLabels);
 const palette = <?= json_encode($palette) ?>;
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    //  Decisive vs Draws donut 
+
     new Chart(document.getElementById('resultChart').getContext('2d'), {
         type: 'doughnut',
         data: {
@@ -516,7 +516,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    //  Cumulative line chart 
+
     const top5Names = <?= json_encode($top5names) ?>;
     const cumData   = <?= json_encode($cumData) ?>;
     const lineDatasets = top5Names.map((name, i) => ({
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    //  All-player bar chart 
+
     const allNames = <?= json_encode(array_map(fn($s) => strtoupper($s['firstName']), $standings)) ?>;
     const allPts   = <?= json_encode(array_column($standings, 'total_pts')) ?>;
     new Chart(document.getElementById('barChart').getContext('2d'), {
@@ -578,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    //  Age distribution bar 
+
     const ageBuckets = <?= json_encode(array_values($ageBuckets)) ?>;
     const ageLabels  = <?= json_encode(array_keys($ageBuckets)) ?>;
     new Chart(document.getElementById('ageChart').getContext('2d'), {
@@ -608,7 +608,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    //  Win rate horizontal bar
     const wrNames = <?= json_encode(array_values(array_map(fn($s) => strtoupper($s['firstName']), array_filter($standings, fn($s) => $s['games_played'] > 0)))) ?>;
     const wrData  = <?= json_encode(array_values(array_map(fn($s) => (float)($s['games_played'] > 0 ? round($s['wins'] / $s['games_played'] * 100, 1) : 0), array_filter($standings, fn($s) => $s['games_played'] > 0)))) ?>;
     new Chart(document.getElementById('winRateChart').getContext('2d'), {
@@ -639,7 +638,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    //  Rating distribution bar 
     const ratingLabels = <?= json_encode($ratingLabels) ?>;
     const ratingData   = <?= json_encode($ratingData) ?>;
     new Chart(document.getElementById('ratingChart').getContext('2d'), {

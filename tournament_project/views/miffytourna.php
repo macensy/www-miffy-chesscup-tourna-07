@@ -32,14 +32,12 @@
             background: #0A0301;
         }
 
-        /* ── CANVAS BG ───────────────────── */
         #bgCanvas {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: 0;
         }
 
-        /* ── GRID OVERLAY ─────────────────── */
         .grid-overlay {
             position: fixed; inset: 0;
             z-index: 1;
@@ -51,7 +49,6 @@
             mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
         }
 
-        /* ── SCANLINE EFFECT ──────────────── */
         .scanlines {
             position: fixed; inset: 0; z-index: 2;
             pointer-events: none;
@@ -64,10 +61,8 @@
             );
         }
 
-        /* All content above canvas */
         nav, .hero, .cards-section, footer, .watermark { position: relative; z-index: 10; }
 
-        /* ── NAV ─────────────────────────── */
         nav {
             display: flex; align-items: center; justify-content: space-between;
             padding: 24px 40px;
@@ -118,7 +113,6 @@
         }
         .btn-nav-caramel:hover { background: rgba(212,130,74,0.2); }
 
-        /* ── HERO ─────────────────────────── */
         .hero {
             min-height: 88vh;
             display: flex; flex-direction: column;
@@ -128,7 +122,6 @@
             position: relative;
         }
 
-        /* Rotating chessboard ring */
         .hero-ring {
             position: absolute;
             width: 700px; height: 700px;
@@ -167,7 +160,6 @@
             to   { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        /* Orbital chess pieces */
         .orbital {
             position: absolute;
             width: 700px; height: 700px;
@@ -234,7 +226,6 @@
             50%       { background-position: 100% 50%; }
         }
 
-        /* Glitch effect on hover */
         .hero-title:hover .accent {
             animation: glitch 0.3s steps(2) both, shimmer 4s ease-in-out infinite;
         }
@@ -258,7 +249,6 @@
             animation: fadeSlideUp 0.9s 0.45s ease both;
         }
 
-        /* ── FLOATING STATS ───────────────── */
         .floating-stats {
             display: flex; gap: 40px;
             margin-top: 64px;
@@ -327,7 +317,6 @@
         }
         .btn-secondary:hover { border-color: var(--caramel); color: var(--caramel); background: rgba(212,130,74,0.05); }
 
-        /* ── MARQUEE STRIP ────────────────── */
         .marquee-wrap {
             overflow: hidden;
             border-top: 1px solid rgba(212,130,74,0.1);
@@ -354,7 +343,6 @@
             to   { transform: translateX(-50%); }
         }
 
-        /* ── SECTION DIVIDER ──────────────── */
         .section-divider {
             display: flex; align-items: center; gap: 20px;
             max-width: 300px; margin: 0 auto 60px;
@@ -370,7 +358,6 @@
             font-size: 18px; opacity: 0.5; color: var(--caramel);
         }
 
-        /* ── CARDS ─────────────────────────── */
         .cards-section {
             max-width: 1060px; margin: 0 auto;
             padding: 0 24px 100px;
@@ -397,7 +384,6 @@
         .info-card:nth-child(2) { transition-delay: 0.1s; }
         .info-card:nth-child(3) { transition-delay: 0.2s; }
 
-        /* Animated top border */
         .info-card::before {
             content: '';
             position: absolute; top: 0; left: -100%; right: 100%;
@@ -407,7 +393,6 @@
         }
         .info-card:hover::before { left: 0; right: 0; }
 
-        /* Corner glow */
         .info-card::after {
             content: '';
             position: absolute; bottom: -60px; right: -60px;
@@ -446,7 +431,6 @@
             line-height: 1.7; font-weight: 300;
         }
 
-        /* ── FOOTER ───────────────────────── */
         footer {
             border-top: 1px solid rgba(255,255,255,0.04);
             padding: 40px 24px;
@@ -459,7 +443,6 @@
             text-transform: uppercase; color: rgba(255,255,255,0.18);
         }
 
-        /* ── CURSOR TRAIL (desktop only) ── */
         .cursor-dot {
             width: 6px; height: 6px; border-radius: 50%;
             background: var(--caramel);
@@ -489,12 +472,10 @@
 <div class="grid-overlay"></div>
 <div class="scanlines"></div>
 
-<!-- Cursor trail dots -->
 <div class="cursor-dot" id="dot1"></div>
 <div class="cursor-dot" id="dot2"></div>
 <div class="cursor-dot" id="dot3"></div>
 
-<!-- NAV -->
 <nav>
     <a class="brand" href="#">
         <img src="../assets/miffy.jpg" class="brand-logo" alt="Miffy">
@@ -506,9 +487,8 @@
     </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
-    <!-- Animated rings -->
+
     <div class="hero-ring"></div>
     <div class="hero-ring-2"></div>
     <div class="orbital">
@@ -536,7 +516,7 @@
             <i class="material-icons" style="font-size:18px;">how_to_reg</i>
             Register Player
         </a>
-        <a href="loginpage.php" class="btn-secondary">
+        <a href="standings.php" class="btn-secondary">
             <i class="material-icons" style="font-size:18px;">login</i>
             View Standings
         </a>
@@ -559,7 +539,6 @@
     </div>
 </section>
 
-<!-- MARQUEE -->
 <div class="marquee-wrap">
     <div class="marquee-track" id="marqueeTrack">
         <span class="marquee-item">♟ Swiss System <span class="marquee-dot"></span></span>
@@ -577,7 +556,6 @@
     </div>
 </div>
 
-<!-- INFO CARDS -->
 <section class="cards-section">
     <div class="section-divider"><span>♞</span></div>
     <div class="cards-grid">
@@ -603,12 +581,11 @@
 </section>
 
 <footer>
-    <div class="footer-chess">♟ ♞ ♝ ♜ ♛ ♚</div>
     <p>&copy; 2026 Miffy Chess Cup &bull; Arbiter Portal V3.0</p>
 </footer>
 
 <script>
-// ── BACKGROUND CANVAS ──────────────────────────────────
+
 (function() {
     const canvas = document.getElementById('bgCanvas');
     const ctx    = canvas.getContext('2d');
@@ -624,7 +601,6 @@
     resize();
     window.addEventListener('resize', resize);
 
-    // More varied particles with different behaviors
     for (let i = 0; i < 35; i++) {
         particles.push({
             x: Math.random() * 1600,
@@ -636,7 +612,7 @@
             alpha: 0.018 + Math.random() * 0.055,
             rot: Math.random() * Math.PI * 2,
             rotSpeed: (Math.random() - 0.5) * 0.005,
-            // wave motion
+
             waveAmp: Math.random() * 0.8,
             waveFreq: 0.3 + Math.random() * 0.7,
             waveOffset: Math.random() * Math.PI * 2,
@@ -648,7 +624,6 @@
     function draw() {
         time += 0.003;
 
-        // Base dark gradient
         const grad = ctx.createRadialGradient(W*0.5, H*0.45, 0, W*0.5, H*0.45, W*0.95);
         grad.addColorStop(0,   'rgba(36, 16, 6, 0.97)');
         grad.addColorStop(0.5, 'rgba(18, 7, 3, 0.98)');
@@ -656,13 +631,12 @@
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, W, H);
 
-        // Animated pulsing nebula orbs
         const orbs = [
             { x: W*(0.18 + 0.07*Math.sin(time*0.6)), y: H*(0.22 + 0.06*Math.cos(time*0.45)), r: W*0.32, c: `rgba(107,58,42,${0.06 + 0.025*Math.sin(time*0.8)})` },
             { x: W*(0.84 + 0.05*Math.cos(time*0.55)), y: H*(0.68 + 0.07*Math.sin(time*0.38)), r: W*0.26, c: `rgba(181,98,42,${0.055 + 0.018*Math.cos(time*1.1)})` },
             { x: W*(0.5  + 0.04*Math.sin(time*0.85)), y: H*(0.88 + 0.035*Math.cos(time*0.75)), r: W*0.22, c: `rgba(212,130,74,${0.04 + 0.012*Math.sin(time*1.4)})` },
             { x: W*(0.67 + 0.09*Math.sin(time*0.38)), y: H*(0.12 + 0.055*Math.cos(time*0.65)), r: W*0.24, c: `rgba(90,40,20,${0.065 + 0.022*Math.sin(time*0.85)})` },
-            // Extra center glow that pulses
+
             { x: W*0.5, y: H*0.5, r: W*0.15, c: `rgba(140,70,30,${0.025 + 0.015*Math.sin(time*2)})` },
         ];
         orbs.forEach(o => {
@@ -673,7 +647,6 @@
             ctx.fillRect(0, 0, W, H);
         });
 
-        // Floating chess pieces with wave motion
         ctx.textBaseline = 'middle';
         particles.forEach(p => {
             const wx = p.waveAmp * 30 * Math.sin(time * p.waveFreq + p.waveOffset);
@@ -701,7 +674,6 @@
     draw();
 })();
 
-// ── CURSOR TRAIL ───────────────────────────────────────
 (function() {
     const dots = [
         document.getElementById('dot1'),
@@ -750,7 +722,6 @@
     }
 })();
 
-// ── INTERACTIVE CLICKABLE CHESS PIECES ────────────────
 (function() {
     const PIECES = ['♟','♞','♝','♜','♛','♚','♙','♘','♗','♖','♕','♔'];
     const COLORS = [
@@ -764,7 +735,6 @@
 
     let score = 0, combo = 0, best = 0, pieces = [], pid = 0;
 
-    // HUD
     const hud = document.createElement('div');
     hud.innerHTML = `<div id="ic-hud" style="position:fixed;bottom:20px;right:22px;display:flex;gap:8px;z-index:9999;pointer-events:none;">
         <div class="ic-pill">Eaten <b id="ic-score">0</b></div>
@@ -772,7 +742,6 @@
     </div>`;
     document.body.appendChild(hud);
 
-    // Combo banner
     const banner = document.createElement('div');
     banner.id = 'ic-combo';
     banner.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:rgba(10,3,1,0.92);border:1px solid rgba(232,169,106,0.55);border-radius:12px;padding:10px 28px;font-family:Cinzel,serif;font-size:22px;color:#E8A96A;letter-spacing:2px;z-index:9999;pointer-events:none;opacity:0;transition:transform 0.2s cubic-bezier(.34,1.56,.64,1),opacity 0.15s;';
@@ -876,12 +845,10 @@
         for (let i = 0; i < need; i++) setTimeout(spawn, i * rnd(120, 400));
     }
 
-    // Initial spawn
     for (let i = 0; i < 8; i++) setTimeout(spawn, i * 180);
     setInterval(() => { if (pieces.length < 4) refill(); }, 2000);
 })();
 
-// ── SCROLL REVEAL FOR CARDS ────────────────────────────
 (function() {
     const cards = document.querySelectorAll('.info-card');
     const observer = new IntersectionObserver(entries => {
@@ -894,7 +861,6 @@
     cards.forEach(c => observer.observe(c));
 })();
 
-// ── MOUSEOVER PARALLAX ON HERO ─────────────────────────
 (function() {
     const hero = document.querySelector('.hero');
     const ring = document.querySelector('.hero-ring');

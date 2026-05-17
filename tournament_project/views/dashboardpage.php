@@ -9,7 +9,6 @@ $currentRound = isset($_GET['round']) ? (int)$_GET['round'] : 1;
 $user = $_SESSION['user'];
 $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
 
-
 $adminData = $manager->getAdminDashboardStats($currentRound);
 $standings  = $manager->getLeaderboards() ?? [];
 $pairings   = $manager->getPairings($currentRound) ?? [];
@@ -20,7 +19,7 @@ $maxRoundsReached    = false;
 $prevRoundPending    = false;
 $existingRounds      = [];
 try {
-    $db   = (new Database())->connectDB(); // reuses singleton
+    $db   = (new Database())->connectDB();
     $rRows = $db->query("SELECT DISTINCT round_num FROM tbl_pairing ORDER BY round_num ASC")->fetchAll(PDO::FETCH_COLUMN);
     $existingRounds = $rRows;
 
@@ -35,17 +34,15 @@ try {
     }
 } catch (Exception $e) {}
 
-
 $roundProgress = [];
 try {
-    $db2 = (new Database())->connectDB(); // reuses singleton
+    $db2 = (new Database())->connectDB();
     $rows = $db2->query("SELECT round_num,
                           SUM(CASE WHEN status='FINISHED' THEN 1 ELSE 0 END) as finished,
                           SUM(CASE WHEN status!='FINISHED' THEN 1 ELSE 0 END) as pending
                           FROM tbl_pairing GROUP BY round_num ORDER BY round_num ASC")->fetchAll(PDO::FETCH_ASSOC);
     foreach ($rows as $r) $roundProgress[] = $r;
 } catch (Exception $e) { $roundProgress = []; }
-
 
 $chartLabels = [];
 $chartData   = [];
@@ -156,15 +153,15 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
             border-radius: 8px 8px 0 0; font-family: 'Cinzel', serif;
             font-size: 2.5rem; font-weight: 900; color: rgba(0,0,0,0.3);
         }
-        /* 1st place */
+
         .podium-place.first .podium-avatar  { background: rgba(212,168,67,0.18); border-color: var(--gold); color: var(--gold-lt); }
         .podium-place.first .podium-name    { color: var(--gold-lt); }
         .podium-place.first .podium-block   { height: 160px; background: linear-gradient(180deg, #D4A843, #8B6B1A); }
-        /* 2nd place */
+
         .podium-place.second .podium-avatar { background: rgba(192,192,192,0.15); border-color: #C0C0C0; color: #E0E0E0; }
         .podium-place.second .podium-name   { color: #E0E0E0; }
         .podium-place.second .podium-block  { height: 120px; background: linear-gradient(180deg, #B0B0B0, #606060); }
-        /* 3rd place */
+
         .podium-place.third .podium-avatar  { background: rgba(205,127,50,0.15); border-color: #CD7F32; color: #E8A060; }
         .podium-place.third .podium-name    { color: #E8A060; }
         .podium-place.third .podium-block   { height: 90px; background: linear-gradient(180deg, #CD7F32, #7A4A18); }
@@ -250,7 +247,6 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
 </head>
 <body>
 
-
 <canvas id="bgCanvas"></canvas>
 <canvas id="confettiCanvas"></canvas>
 
@@ -303,7 +299,6 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
 
     <div class="main-grid">
 
-        <!-- LEFT: Standings + Pie -->
         <div>
             <div class="glass-card">
                 <div class="card-title">Standings</div>
@@ -422,7 +417,7 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
             </div>
 
             <?php if($isAdmin): ?>
-            <!-- Analytics Promo Card -->
+
             <div class="glass-card" style="text-align:center; padding: 32px 24px;">
                 <div style="font-size: 38px; margin-bottom: 12px;">📊</div>
                 <div style="font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--caramel); margin-bottom:10px;">Deep Analytics</div>
@@ -440,7 +435,6 @@ foreach (array_slice($wdlData, 0, 8) as $w) {
 </div>
 <?php if(!$isAdmin):
 
-// Player's own WDL + rank
 $myID     = (int)$user['userID'];
 $myWDL    = ['wins'=>0,'draws'=>0,'losses'=>0,'total_pts'=>0,'rank'=>'—'];
 $myRating = htmlspecialchars($user['rating'] ?? '—');
@@ -466,7 +460,7 @@ $nextOpponent = null;
 $nextMatchRound = null;
 $myColor = null;
 try {
-    $dbNext = (new Database())->connectDB(); // reuses singleton
+    $dbNext = (new Database())->connectDB();
     $stmtOpp = $dbNext->prepare("
         SELECT m.*, p1.firstName AS p1Name, p2.firstName AS p2Name
         FROM tbl_pairing m
@@ -494,19 +488,19 @@ try {
 $countdownTarget = null;
 $countdownLabel  = '';
 try {
-    $dbCd = (new Database())->connectDB(); // reuses singleton
+    $dbCd = (new Database())->connectDB();
     $maxR = (int)$dbCd->query("SELECT COALESCE(MAX(round_num),0) FROM tbl_pairing")->fetchColumn();
     if($maxR > 0) {
         $stmtPend = $dbCd->prepare("SELECT COUNT(*) FROM tbl_pairing WHERE round_num=? AND status!='FINISHED'");
         $stmtPend->execute([$maxR]);
         $pendingInMax = (int)$stmtPend->fetchColumn();
         if($pendingInMax > 0) {
-            // Countdown to end of day (midnight local) — represents "results day"
+
             $midnight = mktime(23,59,59, date('n'), date('j'), date('Y'));
             $countdownTarget = $midnight;
             $countdownLabel  = 'Round ' . $maxR . ' results close';
         } else {
-            // Round complete — admin may generate next round anytime; show session idle timer
+
             $countdownTarget = strtotime('tomorrow midnight');
             $countdownLabel  = 'Next round expected by';
         }
@@ -519,16 +513,14 @@ try {
     $countdownLabel  = 'Next update in';
 }
 
-$puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
+$puzzleOfDay = (int)date('z') % 10;
 
 ?>
 
 <div class="page-wrap" style="max-width:1100px;margin:0 auto;padding:0 20px 48px;">
 
-    <!-- ── Row 1: Status Card + Countdown ──────────────────────────── -->
     <div class="player-row-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
 
-        <!-- STATUS CARD -->
         <div class="glass-card" style="padding:26px 24px;">
             <div class="card-title">♟ My Tournament Status</div>
 
@@ -546,7 +538,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
                 </div>
             </div>
 
-            <!-- W/D/L mini-row -->
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px;">
                 <div style="background:rgba(76,175,130,0.12);border:1px solid rgba(76,175,130,0.25);border-radius:10px;padding:12px 6px;text-align:center;">
                     <div style="font-family:'Cinzel',serif;font-size:1.4rem;font-weight:600;color:var(--win-color);"><?= $myWDL['wins'] ?></div>
@@ -566,7 +557,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
                 </div>
             </div>
 
-            <!-- Rank -->
             <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(107,58,42,0.22);border-radius:10px;margin-bottom:16px;">
                 <span style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);">Current Rank</span>
                 <span style="font-family:'Cinzel',serif;font-size:1.2rem;font-weight:700;color:var(--gold-lt);">
@@ -574,7 +564,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
                 </span>
             </div>
 
-            <!-- Next match -->
             <?php if($nextOpponent): ?>
             <div style="padding:12px 16px;background:rgba(76,175,130,0.08);border:1px solid rgba(76,175,130,0.22);border-radius:10px;">
                 <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;">Next Match — Round <?= $nextMatchRound ?></div>
@@ -590,7 +579,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
             <?php endif; ?>
         </div>
 
-        <!-- TOURNAMENT COUNTDOWN -->
         <div class="glass-card" style="padding:26px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
             <div style="font-size:32px;margin-bottom:12px;">⏱</div>
             <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--caramel);margin-bottom:6px;">
@@ -600,7 +588,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
                 <?= date('F j, Y') ?>
             </div>
 
-            <!-- Countdown display -->
             <div style="display:flex;gap:16px;align-items:flex-end;margin-bottom:28px;">
                 <div style="text-align:center;">
                     <div id="cd-hours" style="font-family:'Cinzel',serif;font-size:2.6rem;font-weight:700;color:var(--cream);line-height:1;min-width:60px;">00</div>
@@ -618,12 +605,10 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
                 </div>
             </div>
 
-            <!-- Progress bar -->
             <div style="width:100%;background:rgba(255,255,255,0.06);border-radius:6px;height:5px;overflow:hidden;margin-bottom:16px;">
                 <div id="cd-bar" style="height:100%;background:linear-gradient(90deg,var(--mocha-light),var(--caramel));border-radius:6px;transition:width 1s linear;width:0%;"></div>
             </div>
 
-            <!-- Round pills -->
             <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">
                 <?php
                 $totalRounds = 7;
@@ -656,7 +641,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
 
         <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;">
 
-            <!-- Board -->
             <div style="flex-shrink:0;">
                 <canvas id="pzBoard" width="360" height="360" style="border-radius:10px;display:block;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,0.5);"></canvas>
                 <div style="display:flex;justify-content:space-between;margin-top:8px;padding:0 4px;">
@@ -666,30 +650,24 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
                 </div>
             </div>
 
-            <!-- Side panel -->
             <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:0;">
 
-                <!-- Turn badge -->
                 <div id="pz-turn" style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:20px;background:rgba(212,130,74,0.1);border:1px solid rgba(212,130,74,0.28);margin-bottom:18px;align-self:flex-start;">
                     <span id="pz-dot" style="width:10px;height:10px;border-radius:50%;background:#FAF0DC;display:inline-block;"></span>
                     <span id="pz-turn-text" style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--caramel);">WHITE TO MOVE</span>
                 </div>
 
-                <!-- Hint -->
                 <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,130,74,0.5);margin-bottom:6px;">Objective</div>
                 <div id="pz-hint" style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:18px;min-height:38px;"></div>
 
-                <!-- Status -->
                 <div id="pz-status" style="font-size:13px;font-weight:500;min-height:20px;margin-bottom:18px;"></div>
 
-                <!-- Buttons -->
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
                     <button onclick="pzReset()" style="padding:9px 18px;background:var(--mocha-light);color:white;border:none;border-radius:20px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;cursor:pointer;transition:0.2s;" onmouseover="this.style.background='var(--mocha-glow)'" onmouseout="this.style.background='var(--mocha-light)'">↺ Try Again</button>
                     <button onclick="pzNext()" style="padding:9px 18px;background:transparent;color:var(--caramel);border:1px solid rgba(212,130,74,0.38);border-radius:20px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;cursor:pointer;transition:0.2s;">Next ›</button>
                     <button onclick="pzReveal()" id="pz-reveal-btn" style="padding:9px 18px;background:transparent;color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:20px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1.5px;cursor:pointer;transition:0.2s;">Show Answer</button>
                 </div>
 
-                <!-- Stats row -->
                 <div style="padding-top:16px;border-top:1px solid rgba(212,130,74,0.12);display:flex;gap:20px;">
                     <div>
                         <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(212,130,74,0.45);margin-bottom:4px;">Solved today</div>
@@ -726,7 +704,7 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
         document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
         document.getElementById('cd-mins').textContent  = String(m).padStart(2,'0');
         document.getElementById('cd-secs').textContent  = String(s).padStart(2,'0');
-        // progress bar: percentage of current day elapsed
+
         const dayPct = Math.min(100, ((now - dayStart.getTime()) / dayMs) * 100);
         document.getElementById('cd-bar').style.width = dayPct.toFixed(1) + '%';
         if(diff <= 0) { clearInterval(timer); document.getElementById('cd-secs').textContent='00'; }
@@ -736,7 +714,6 @@ $puzzleOfDay = (int)date('z') % 10;  // 10 puzzles in JS array
 })();
 </script>
 
-<!-- ═══ DAILY PUZZLE SCRIPT ═══ -->
 <script>
 (function(){
 const LIGHT='#C8956A', DARK='#3E1A06';
@@ -748,7 +725,6 @@ const SZ     = 45;
 
 const GLYPHS = {wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',bK:'♚',bQ:'♛',bR:'♜',bB:'♝',bN:'♞',bP:'♟'};
 
-// ── 10 classic puzzles (White to move, mate-in-1 or mate-in-2) ────────
 const PUZZLES = [
     {
         label:'Mate in 1', hint:'White delivers checkmate in one move.',
@@ -885,7 +861,6 @@ canvas.addEventListener('click', e=>{
     }
     if(selected.r===r && selected.c===c){ selected=null; render(); return; }
 
-    // Check if it's the correct piece + destination
     if(selected.r===move.fr && selected.c===move.fc && r===move.tr && c===move.tc){
         board[r][c] = board[selected.r][selected.c];
         board[selected.r][selected.c] = null;
@@ -944,7 +919,7 @@ window.pzReveal = function(){
     const st = document.getElementById('pz-status');
     st.textContent = 'Answer revealed — try a new puzzle!';
     st.style.color = 'rgba(255,255,255,0.4)';
-    // Play out the full solution on the board
+
     let delay = 0;
     pz.solution.forEach(mv => {
         setTimeout(()=>{
@@ -993,7 +968,6 @@ document.addEventListener('DOMContentLoaded', function() {
     resize();
     window.addEventListener('resize', resize);
 
-    // Create floating chess piece particles
     for (let i = 0; i < 22; i++) {
         particles.push({
             x: Math.random() * 1400,
@@ -1009,7 +983,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function draw() {
-        // Dark mocha gradient base
+
         const grad = ctx.createRadialGradient(W*0.5, H*0.4, 0, W*0.5, H*0.4, W*0.85);
         grad.addColorStop(0,   'rgba(40, 18, 8, 0.95)');
         grad.addColorStop(0.5, 'rgba(22, 9, 4, 0.97)');
@@ -1017,7 +991,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, W, H);
 
-        // Subtle glow orbs
         const orbs = [
             { x: W*0.2, y: H*0.3, r: W*0.28, c: 'rgba(107,58,42,0.07)' },
             { x: W*0.8, y: H*0.7, r: W*0.22, c: 'rgba(181,98,42,0.06)' },
@@ -1031,7 +1004,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.fillRect(0, 0, W, H);
         });
 
-        // Floating chess pieces
         ctx.textBaseline = 'middle';
         particles.forEach(p => {
             ctx.save();
@@ -1057,13 +1029,12 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
-
 <script>
 <?php
 $tournamentComplete = false;
 $podiumData = [];
 try {
-    $dbCheck = (new Database())->connectDB(); // reuses singleton
+    $dbCheck = (new Database())->connectDB();
     $roundCount = (int)$dbCheck->query("SELECT COUNT(DISTINCT round_num) FROM tbl_pairing")->fetchColumn();
     $pendingCount = (int)$dbCheck->query("SELECT COUNT(*) FROM tbl_pairing WHERE status != 'FINISHED'")->fetchColumn();
     if ($roundCount >= 7 && $pendingCount === 0) {
@@ -1083,7 +1054,6 @@ try {
 const TOURNAMENT_COMPLETE = <?= $tournamentComplete ? 'true' : 'false' ?>;
 const PODIUM_DATA = <?= json_encode($podiumData) ?>;
 
-// Confetti 
 const confettiCanvas = document.getElementById('confettiCanvas');
 const cctx = confettiCanvas.getContext('2d');
 let confettiParticles = [];
@@ -1142,16 +1112,15 @@ function startConfetti() {
         spawnBurst(); bursts++;
         if (bursts >= 30) clearInterval(interval);
     }, 180);
-    // Auto-stop after 8s
+
     setTimeout(() => { confettiRunning = false; cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height); }, 8000);
 }
 
-// ─── Podium ───
 function buildPodium() {
     const stage = document.getElementById('podiumStage');
     if (!PODIUM_DATA || PODIUM_DATA.length === 0) return;
 
-    const order  = [1, 0, 2]; // 2nd, 1st, 3rd left-to-right
+    const order  = [1, 0, 2];
     const classes = ['second','first','third'];
     const medals  = ['🥈','🥇','🥉'];
 
@@ -1178,7 +1147,6 @@ function closePodium() {
     cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
 }
 
-
 if (TOURNAMENT_COMPLETE) {
     window.addEventListener('load', () => {
         setTimeout(() => {
@@ -1203,7 +1171,6 @@ window.addEventListener('load', () => {
         }, 28);
     });
 });
-
 
 document.querySelectorAll('.pairing-row').forEach(row => {
     const cells = row.querySelectorAll('.player-cell');

@@ -67,10 +67,10 @@ if (isset($_SESSION['user'])) { header("Location: dashboardpage.php"); exit(); }
         <div class="login-sub">Tournament Portal</div>
 
         <label class="field-label">Email</label>
-        <input id="LoginEmail" type="email" class="field-input" placeholder="Enter your email">
+        <input id="LoginEmail" type="email" class="field-input" placeholder="Enter your email" minlength="2" maxlength="50">
 
         <label class="field-label">Password</label>
-        <input id="LoginPassword" type="password" class="field-input" placeholder="Enter your password">
+        <input id="LoginPassword" type="password" class="field-input" placeholder="Enter your password" minlength="2" maxlength="50">
 
         <button class="btn-login" onclick="loginFunc()">Login Now</button>
 

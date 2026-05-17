@@ -112,7 +112,6 @@ $players = $manager->getUser();
 <div class="reg-wrap">
     <div class="reg-grid">
 
-        <!-- LEFT: Form -->
         <div class="left-panel">
             <center>
                 <img src="../assets/miffy.jpg" class="panel-logo" alt="Miffy">
@@ -161,26 +160,25 @@ $players = $manager->getUser();
 
             <div class="field-group">
                 <label class="field-label">Email</label>
-                <input id="RegEmail" type="email" class="field-input" maxlength="100" placeholder="e.g. juan@email.com">
+                <input id="RegEmail" type="email" class="field-input" minlength="2" maxlength="50" placeholder="e.g. juan@email.com">
             </div>
 
             <div class="field-group">
                 <label class="field-label">Password</label>
-                <input id="RegPassword" type="password" class="field-input" placeholder="Min. 8 chars, uppercase, number, symbol" oninput="checkStrength(this.value)">
+                <input id="RegPassword" type="password" class="field-input" placeholder="Min. 8 chars, uppercase, number, symbol" minlength="2" maxlength="50" oninput="checkStrength(this.value)">
                 <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
                 <div class="strength-text" id="strengthText"></div>
             </div>
 
             <div class="field-group">
                 <label class="field-label">Confirm Password</label>
-                <input id="RegConfirm" type="password" class="field-input" placeholder="Re-enter password">
+                <input id="RegConfirm" type="password" class="field-input" placeholder="Re-enter password" minlength="2" maxlength="50">
             </div>
 
             <button class="btn-register" onclick="addFunc()">Submit Player</button>
             <a href="loginpage.php" class="back-link">← Already have an account?</a>
         </div>
 
-        <!-- RIGHT: Player list -->
         <div class="right-panel">
             <div class="list-title">Registered Players</div>
             <div class="player-scroll">
@@ -227,7 +225,7 @@ function checkStrength(val) {
     let score = 0;
     if (val.length >= 8) score++;
     if (val.length >= 12) score++;
-    if (/[a-z]/.test(val)) {} // lowercase required but not scored separately
+    if (/[a-z]/.test(val)) {}
     if (/[A-Z]/.test(val)) score++;
     if (/[0-9]/.test(val)) score++;
     if (/[^A-Za-z0-9]/.test(val)) score++;

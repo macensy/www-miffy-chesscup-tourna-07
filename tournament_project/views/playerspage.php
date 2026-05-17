@@ -66,7 +66,6 @@ $allAdmins  = $isAdmin ? ($manager->getAdmins() ?? []) : [];
         .btn-add:hover { background: var(--mocha-glow); color: white; }
         .btn-add .material-icons { font-size: 16px; }
 
-        /* ★ SEARCH & FILTER BAR */
         .filter-bar {
             display: flex; gap: 10px; align-items: center;
             margin-bottom: 16px; flex-wrap: wrap;
@@ -142,7 +141,6 @@ $allAdmins  = $isAdmin ? ($manager->getAdmins() ?? []) : [];
         tr.hidden-row { display: none; }
         @keyframes rowChessIn { from { opacity:0; transform:translateX(-4px); } to { opacity:1; transform:translateX(0); } }
 
-        /* ★ TABS */
         .tab-bar {
             display: flex; gap: 4px; margin-bottom: 18px;
             border-bottom: 1px solid rgba(212,130,74,0.15); padding-bottom: 0;
@@ -202,7 +200,6 @@ $allAdmins  = $isAdmin ? ($manager->getAdmins() ?? []) : [];
         <a href="registrationpage.php" class="btn-add"><i class="material-icons">add</i> New Player</a>
     </div>
 
-    <!-- ★ TAB BAR -->
     <?php if($isAdmin): ?>
     <div class="tab-bar">
         <button class="tab-btn active" onclick="switchTab('players', this)">
@@ -214,9 +211,8 @@ $allAdmins  = $isAdmin ? ($manager->getAdmins() ?? []) : [];
     </div>
     <?php endif; ?>
 
-    <!-- ══════════ PLAYERS TAB ══════════ -->
     <div id="tab-players" class="tab-content active">
-    <!-- ★ SEARCH & FILTER BAR -->
+
     <div class="filter-bar">
         <div class="search-wrap">
             <i class="material-icons">search</i>
@@ -312,11 +308,10 @@ $allAdmins  = $isAdmin ? ($manager->getAdmins() ?? []) : [];
             </tbody>
         </table>
     </div>
-    </div><!-- /tab-admins -->
+    </div>
     <?php endif; ?>
 </div>
 
-<!-- EDIT MODAL -->
 <div id="modalEdit" class="modal">
     <div class="modal-content">
         <div class="modal-title">Update Player</div>
@@ -324,11 +319,11 @@ $allAdmins  = $isAdmin ? ($manager->getAdmins() ?? []) : [];
         <div class="modal-row">
             <div>
                 <label class="modal-field-label">First Name</label>
-                <input id="editFName" type="text" class="modal-field" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').slice(0,50);">
+                <input id="editFName" type="text" class="modal-field" minlength="2" maxlength="50" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').slice(0,50);">
             </div>
             <div>
                 <label class="modal-field-label">Last Name</label>
-                <input id="editLName" type="text" class="modal-field" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').slice(0,50);">
+                <input id="editLName" type="text" class="modal-field" minlength="2" maxlength="50" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').slice(0,50);">
             </div>
             <div>
                 <label class="modal-field-label">Age</label>
@@ -354,7 +349,7 @@ $allAdmins  = $isAdmin ? ($manager->getAdmins() ?? []) : [];
 $(document).ready(function(){ $('.modal').modal(); });
 
 function switchTab(name, btn) {
-    // Hide all tab contents
+
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
@@ -367,7 +362,6 @@ function openEditModal(id, fn, ln, ag, rt) {
     $('#modalEdit').modal('open');
 }
 
-// ★ SEARCH & FILTER
 function applyFilters() {
     const q      = document.getElementById('searchInput').value.toLowerCase().trim();
     const gender = document.getElementById('genderFilter').value;
@@ -403,7 +397,6 @@ function applyFilters() {
         : `${total} player${total !== 1 ? 's' : ''}`;
 }
 
-// ★ COLUMN SORT
 let sortDir = {};
 function sortTable(colIdx) {
     const tbody = document.getElementById('playersBody');
@@ -411,7 +404,6 @@ function sortTable(colIdx) {
     sortDir[colIdx] = !sortDir[colIdx];
     const asc = sortDir[colIdx];
 
-    // Update header icons
     document.querySelectorAll('.players-table th').forEach((th, i) => {
         th.classList.toggle('sorted', i === colIdx);
         const icon = th.querySelector('.sort-icon');
@@ -428,13 +420,11 @@ function sortTable(colIdx) {
     });
 
     rows.forEach(r => tbody.appendChild(r));
-    applyFilters(); // re-apply active filters after sort
+    applyFilters();
 }
 
-// Init count
 applyFilters();
 
-// ── ROW SPARKLE on hover ──────────────────────────────────
 document.querySelectorAll('.players-table tbody tr[data-name]').forEach(row => {
     row.addEventListener('mouseenter', () => {
         row.style.transition = 'background 0.18s';
@@ -453,7 +443,6 @@ document.querySelectorAll('.players-table tbody tr[data-name]').forEach(row => {
     });
 });
 
-// ── ANIMATE NUMBERS (count up for player total) ───────────
 function countUp(el, target, duration = 900) {
     let start = 0, step = target / (duration / 16);
     const tick = () => {
@@ -468,7 +457,6 @@ document.querySelectorAll('#playerCountBadge').forEach(el => {
     if (!isNaN(n)) { el.textContent = '(0)'; setTimeout(() => countUp({ textContent: '' , set textContent(v){ el.textContent = '(' + v + ')'; } }, n), 300); }
 });
 
-// ── RATING BAR mini-viz on rows ───────────────────────────
 document.querySelectorAll('.players-table tbody tr[data-name]').forEach(row => {
     const ratingVal = parseInt(row.dataset.rating) || 0;
     const ratingCell = row.querySelector('.rating-val');

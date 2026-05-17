@@ -22,7 +22,6 @@
             padding: 24px;
         }
 
-        /* ── Card ── */
         .admin-card {
             background: rgba(30,14,8,0.65);
             backdrop-filter: blur(18px);
@@ -61,7 +60,6 @@
             margin-bottom: 30px;
         }
 
-        /* ── Mode chooser ── */
         .mode-chooser {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -95,7 +93,6 @@
         }
         .mode-btn .mode-icon { font-size: 20px; display: block; margin-bottom: 6px; }
 
-        /* ── Forms ── */
         .form-panel { display: none; }
         .form-panel.active { display: block; }
 
@@ -145,7 +142,6 @@
             white-space: nowrap;
         }
 
-        /* strength meter */
         .strength-bar  { height:3px; border-radius:3px; background:rgba(255,255,255,0.07); margin-top:5px; overflow:hidden; }
         .strength-fill { height:100%; width:0%; border-radius:3px; transition:width 0.3s,background 0.3s; }
         .strength-text { font-size:10px; margin-top:3px; letter-spacing:1px; color:rgba(255,255,255,0.3); text-align:left; }
@@ -193,7 +189,6 @@
     <div class="admin-title">Admin Portal</div>
     <div class="admin-sub">Authorized Personnel Only</div>
 
-    <!-- ── Mode Chooser ── -->
     <div class="mode-chooser">
         <button class="mode-btn active" id="btnLogin" onclick="switchMode('login')">
             <span class="mode-icon">&#9820;</span>
@@ -205,52 +200,50 @@
         </button>
     </div>
 
-    <!-- ── LOGIN FORM ── -->
     <div class="form-panel active" id="panelLogin">
         <label class="field-label">Email Address</label>
-        <input id="LoginEmail" type="email" class="field-input" placeholder="admin@email.com">
+        <input id="LoginEmail" type="email" class="field-input" placeholder="admin@email.com" minlength="2" maxlength="50">
 
         <label class="field-label">Password</label>
-        <input id="LoginPassword" type="password" class="field-input" placeholder="••••••••">
+        <input id="LoginPassword" type="password" class="field-input" placeholder="••••••••" minlength="2" maxlength="50">
 
         <div class="section-divider"><span>Authorization</span></div>
 
         <label class="field-label">Secret Arbiter Key</label>
-        <input id="LoginKey" type="password" class="field-input" placeholder="••••••••••••">
+        <input id="LoginKey" type="password" class="field-input" placeholder="••••••••••••" minlength="2" maxlength="50">
         <p class="key-note">&#9888; Required in addition to your password.</p>
 
         <button class="btn-admin" onclick="loginAdmin()">Enter Portal</button>
     </div>
 
-    <!-- ── REGISTER FORM ── -->
     <div class="form-panel" id="panelRegister">
         <label class="field-label">First Name</label>
         <input id="RegFName" type="text" class="field-input" placeholder="Enter first name"
-               oninput="this.value=this.value.replace(/[^a-zA-Z\s]/g,'')">
+               minlength="2" maxlength="50" oninput="this.value=this.value.replace(/[^a-zA-Z\s]/g,'')">
 
         <label class="field-label">Last Name</label>
         <input id="RegLName" type="text" class="field-input" placeholder="Enter last name"
-               oninput="this.value=this.value.replace(/[^a-zA-Z\s]/g,'')">
+               minlength="2" maxlength="50" oninput="this.value=this.value.replace(/[^a-zA-Z\s]/g,'')">
 
         <div class="section-divider"><span>Account Credentials</span></div>
 
         <label class="field-label">Email Address</label>
-        <input id="RegEmail" type="email" class="field-input" placeholder="admin@email.com">
+        <input id="RegEmail" type="email" class="field-input" placeholder="admin@email.com" maxlength="50">
 
         <label class="field-label">Password</label>
         <input id="RegPassword" type="password" class="field-input"
                placeholder="Min. 8 chars, uppercase, number, symbol"
-               oninput="checkStrength(this.value)">
+               oninput="checkStrength(this.value)" maxlength="50">
         <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
         <div class="strength-text" id="strengthText"></div>
 
         <label class="field-label">Confirm Password</label>
-        <input id="RegConfirm" type="password" class="field-input" placeholder="Re-enter password">
+        <input id="RegConfirm" type="password" class="field-input" placeholder="Re-enter password" maxlength="50">
 
         <div class="section-divider"><span>Authorization</span></div>
 
         <label class="field-label">Secret Arbiter Key</label>
-        <input id="RegKey" type="password" class="field-input" placeholder="••••••••••••">
+        <input id="RegKey" type="password" class="field-input" placeholder="••••••••••••" maxlength="50">
         <p class="key-note">&#9888; Only authorized arbiters have this key.</p>
 
         <button class="btn-admin" onclick="registerAdmin()">Create Admin Account</button>
@@ -262,7 +255,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-/* ── Themed SweetAlert helper (matches service.js) ── */
+
 function miffySwal(opts) {
     return Swal.fire(Object.assign({
         background: '#1C0A04',
@@ -299,7 +292,6 @@ function miffySwal(opts) {
     document.head.appendChild(s);
 })();
 
-// ── Mode switcher ──────────────────────────────────────
 function switchMode(mode) {
     document.getElementById('panelLogin').classList.toggle('active', mode === 'login');
     document.getElementById('panelRegister').classList.toggle('active', mode === 'register');
@@ -307,7 +299,6 @@ function switchMode(mode) {
     document.getElementById('btnRegister').classList.toggle('active', mode === 'register');
 }
 
-// ── Password strength meter ────────────────────────────
 function checkStrength(val) {
     let fill = document.getElementById('strengthFill');
     let text = document.getElementById('strengthText');
@@ -330,7 +321,6 @@ function checkStrength(val) {
     text.textContent=lvl.t; text.style.color=lvl.bg;
 }
 
-// ── Password rules validator ───────────────────────────
 function validatePassword(pass) {
     if (pass.length < 8)            { miffySwal({ title: 'Too Short',     text: 'Password must be at least 8 characters.',               icon: 'warning' }); return false; }
     if (pass.length > 32)           { miffySwal({ title: 'Too Long',      text: 'Password must not exceed 32 characters.',               icon: 'warning' }); return false; }
@@ -341,7 +331,6 @@ function validatePassword(pass) {
     return true;
 }
 
-// ── Login ──────────────────────────────────────────────
 function loginAdmin() {
     let em   = $('#LoginEmail').val().trim();
     let pass = $('#LoginPassword').val();
@@ -371,7 +360,6 @@ function loginAdmin() {
     }).fail(() => miffySwal({ title: 'System Error', text: 'Cannot connect to server.', icon: 'error' }));
 }
 
-// ── Register new admin ─────────────────────────────────
 function registerAdmin() {
     let fn   = $('#RegFName').val().trim();
     let ln   = $('#RegLName').val().trim();

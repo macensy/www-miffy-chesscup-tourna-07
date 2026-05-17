@@ -2,7 +2,6 @@
 
 (function () {
 
-  // ── CURSOR TRAIL (same as landing page) ──────────────────
   const cursorStyle = document.createElement('style');
   cursorStyle.textContent = `
     .fx-cursor-dot {
